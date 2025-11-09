@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../../models/product/product_model.dart';
 import 'product_service.dart';
 
@@ -14,6 +15,7 @@ class ProductServiceImpl implements ProductService {
       final newProduct = product.copyWith(productId: docRef.id);
       await docRef.set(newProduct.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al crear el producto', StackTrace.current);
       throw Exception('Error al crear el producto: $e');
     }
   }
@@ -26,6 +28,7 @@ class ProductServiceImpl implements ProductService {
           .map((doc) => ProductModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener los productos', StackTrace.current);
       throw Exception('Error al obtener los productos: $e');
     }
   }
@@ -38,6 +41,7 @@ class ProductServiceImpl implements ProductService {
           .doc(product.productId)
           .update(product.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al actualizar el producto', StackTrace.current);
       throw Exception('Error al actualizar el producto: $e');
     }
   }
@@ -47,6 +51,7 @@ class ProductServiceImpl implements ProductService {
     try {
       await _firestore.collection(_collection).doc(productId).delete();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al eliminar el producto', StackTrace.current);
       throw Exception('Error al eliminar el producto: $e');
     }
   }
@@ -60,6 +65,7 @@ class ProductServiceImpl implements ProductService {
       if (!doc.exists) return null;
       return ProductModel.fromMap(doc.data()!);
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener el producto', StackTrace.current);
       throw Exception('Error al obtener el producto: $e');
     }
   }

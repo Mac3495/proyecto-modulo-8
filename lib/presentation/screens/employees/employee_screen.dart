@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:proyecto_modulo/core/utils/password_generator.dart';
 import '../../../data/models/user/user_model.dart';
 import '../../modules/employees/employee_bloc.dart';
 import '../../modules/employees/employee_event.dart';
@@ -68,7 +69,14 @@ class _EmployeeView extends StatelessWidget {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
 
-    final bloc = context.read<EmployeeBloc>(); // ✅ tomamos el bloc existente
+    final bloc = context.read<EmployeeBloc>();
+
+    nameController.addListener(() {
+      final name = nameController.text.trim();
+      if (name.isNotEmpty) {
+        passwordController.text = generateSecurePassword(name);
+      }
+    });
 
     showModalBottomSheet(
       context: context,
@@ -146,6 +154,17 @@ class _EmployeeView extends StatelessWidget {
                                     final email = emailController.text.trim();
                                     final password = passwordController.text.trim();
 
+                                    if (!validatePasswordPolicy(password)) {
+                                      ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'La contraseña no cumple con los requisitos de seguridad.',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     if (name.isEmpty || email.isEmpty || password.isEmpty) {
                                       ScaffoldMessenger.of(sheetContext).showSnackBar(
                                         const SnackBar(
@@ -181,5 +200,14 @@ class _EmployeeView extends StatelessWidget {
         );
       },
     );
+  }
+
+  bool validatePasswordPolicy(String password) {
+    final hasUpper = password.contains(RegExp(r'[A-Z]'));
+    final hasNumber = password.contains(RegExp(r'[0-9]'));
+    final hasSpecial = password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
+    final minLength = password.length >= 10;
+
+    return hasUpper && hasNumber && hasSpecial && minLength;
   }
 }

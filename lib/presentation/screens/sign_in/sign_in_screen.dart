@@ -22,10 +22,7 @@ class SignInScreen extends StatelessWidget {
                   listener: (context, state) {
                     if (state.errorMessage != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.errorMessage!),
-                          backgroundColor: Colors.red,
-                        ),
+                        SnackBar(content: Text(state.errorMessage!), backgroundColor: Colors.red),
                       );
                     } else if (state.user != null) {
                       // ✅ Guardar el usuario globalmente
@@ -48,8 +45,7 @@ class SignInScreen extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(Icons.storefront_rounded,
-                            size: 90, color: Colors.green),
+                        const Icon(Icons.storefront_rounded, size: 90, color: Colors.green),
                         const SizedBox(height: 40),
                         TextFormField(
                           onChanged: cubit.onEmailChanged,
@@ -82,20 +78,24 @@ class SignInScreen extends StatelessWidget {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed:
-                                state.isLoading ? null : () => cubit.signIn(),
+                                state.isLoading || state.isLocked ? null : () => cubit.signIn(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: state.isLocked ? Colors.grey : Colors.green,
+                            ),
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14.0),
-                              child: state.isLoading
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : const Text(
-                                      'Iniciar sesión',
-                                      style: TextStyle(
+                              padding: const EdgeInsets.symmetric(vertical: 14.0),
+                              child:
+                                  state.isLoading
+                                      ? const CircularProgressIndicator(color: Colors.white)
+                                      : Text(
+                                        state.isLocked
+                                            ? 'Bloqueado (${state.lockEndTime != null ? state.lockEndTime!.difference(DateTime.now()).inSeconds.clamp(0, 30) : 0}s)'
+                                            : 'Iniciar sesión',
+                                        style: const TextStyle(
                                           fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                             ),
                           ),
                         ),

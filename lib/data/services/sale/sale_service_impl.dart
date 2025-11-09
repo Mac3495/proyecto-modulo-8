@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../../models/sale/sale_model.dart';
 import 'sale_service.dart';
 
@@ -12,6 +13,7 @@ class SaleServiceImpl implements SaleService {
       final newSale = sale.copyWith(saleId: docRef.id);
       await docRef.set(newSale.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al crear la venta', StackTrace.current);
       throw Exception('Error al crear la venta: $e');
     }
   }
@@ -25,6 +27,7 @@ class SaleServiceImpl implements SaleService {
               SaleModel.fromMap(doc.data()).copyWith(saleId: doc.id))
           .toList();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener las ventas', StackTrace.current);
       throw Exception('Error al obtener las ventas: $e');
     }
   }
@@ -40,6 +43,7 @@ class SaleServiceImpl implements SaleService {
               SaleModel.fromMap(doc.data()).copyWith(saleId: doc.id))
           .toList();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener las ventas de la sucursal', StackTrace.current);
       throw Exception('Error al obtener las ventas de la sucursal: $e');
     }
   }
@@ -49,6 +53,7 @@ class SaleServiceImpl implements SaleService {
     try {
       await _collection.doc(saleId).delete();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al eliminar la venta', StackTrace.current);
       throw Exception('Error al eliminar la venta: $e');
     }
   }

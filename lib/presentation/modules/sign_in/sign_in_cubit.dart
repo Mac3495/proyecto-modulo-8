@@ -23,13 +23,63 @@ class SignInCubit extends Cubit<SignInState> {
   }
 
   Future<void> signIn() async {
+    // Bloqueo temporal activo
+    if (state.isLocked) {
+      final remaining = state.lockEndTime!
+          .difference(DateTime.now())
+          .inSeconds
+          .clamp(0, 30);
+      emit(state.copyWith(
+        errorMessage:
+            'Demasiados intentos fallidos. Intente nuevamente en ${remaining}s.',
+      ));
+      return;
+    }
+
     emit(state.copyWith(isLoading: true, errorMessage: null));
 
     try {
       final user = await _authService.signIn(state.email, state.password);
-      emit(state.copyWith(isLoading: false, user: user));
+
+      emit(state.copyWith(
+        isLoading: false,
+        user: user,
+        failedAttempts: 0,
+        isLocked: false,
+        lockEndTime: null,
+      ));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      final newAttempts = state.failedAttempts + 1;
+
+      // Si llega a 3 intentos fallidos → bloqueo 30 segundos
+      if (newAttempts >= 3) {
+        final lockTime = DateTime.now().add(const Duration(seconds: 30));
+        emit(state.copyWith(
+          isLoading: false,
+          failedAttempts: newAttempts,
+          isLocked: true,
+          lockEndTime: lockTime,
+          errorMessage:
+              'Cuenta bloqueada temporalmente por múltiples intentos fallidos. Intente en 30 segundos.',
+        ));
+
+        // Desbloqueo automático después de 30s
+        Future.delayed(const Duration(seconds: 30), () {
+          emit(state.copyWith(
+            failedAttempts: 0,
+            isLocked: false,
+            lockEndTime: null,
+            errorMessage: null,
+          ));
+        });
+      } else {
+        emit(state.copyWith(
+          isLoading: false,
+          failedAttempts: newAttempts,
+          errorMessage:
+              'Credenciales incorrectas. Intento $newAttempts de 3.',
+        ));
+      }
     }
   }
 }

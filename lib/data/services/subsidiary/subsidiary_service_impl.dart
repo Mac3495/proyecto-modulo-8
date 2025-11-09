@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../../models/subsidiary/subsidiary_model.dart';
 import 'subsidiary_service.dart';
 
@@ -15,6 +16,7 @@ class SubsidiaryServiceImpl implements SubsidiaryService {
 
       await docRef.set(newSubsidiary.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al crear la sucursal:', StackTrace.current);
       throw Exception('Error al crear la sucursal: $e');
     }
   }
@@ -27,6 +29,7 @@ class SubsidiaryServiceImpl implements SubsidiaryService {
           .map((doc) => SubsidiaryModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener sucursales', StackTrace.current);
       throw Exception('Error al obtener sucursales: $e');
     }
   }
@@ -38,6 +41,7 @@ class SubsidiaryServiceImpl implements SubsidiaryService {
       if (!doc.exists) return null;
       return SubsidiaryModel.fromMap(doc.data()!);
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener sucursal', StackTrace.current);
       throw Exception('Error al obtener sucursal: $e');
     }
   }
@@ -50,6 +54,7 @@ class SubsidiaryServiceImpl implements SubsidiaryService {
           .doc(subsidiary.subsidiaryId)
           .update(subsidiary.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al actualizar sucursal', StackTrace.current);
       throw Exception('Error al actualizar sucursal: $e');
     }
   }
@@ -59,6 +64,7 @@ class SubsidiaryServiceImpl implements SubsidiaryService {
     try {
       await _firestore.collection(_collection).doc(id).delete();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al eliminar sucursal', StackTrace.current);
       throw Exception('Error al eliminar sucursal: $e');
     }
   }

@@ -11,6 +11,7 @@ dependencies:
   cloud_firestore: ^6.0.1
   firebase_auth: ^6.1.1
   firebase_core: ^4.1.0
+  firebase_crashlytics: ^5.0.4
   equatable: ^2.0.5
   flutter:
     sdk: flutter

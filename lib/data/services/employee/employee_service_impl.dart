@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../../models/user/user_model.dart';
 import 'employee_service.dart';
 
@@ -31,8 +32,10 @@ class EmployeeServiceImpl implements EmployeeService {
         );
       }
     } on FirebaseAuthException catch (e) {
+      FirebaseCrashlytics.instance.recordError('$e', StackTrace.current);
       throw Exception(_mapFirebaseError(e));
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al crear empleado', StackTrace.current);
       throw Exception('Error al crear empleado: $e');
     }
   }
@@ -45,6 +48,7 @@ class EmployeeServiceImpl implements EmployeeService {
 
       return query.docs.map((doc) => UserModel.fromMap(doc.data())).toList();
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener empleados', StackTrace.current);
       throw Exception('Error al obtener empleados: $e');
     }
   }
@@ -56,6 +60,7 @@ class EmployeeServiceImpl implements EmployeeService {
       if (!doc.exists) return null;
       return UserModel.fromMap(doc.data()!);
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al obtener empleado', StackTrace.current);
       throw Exception('Error al obtener empleado: $e');
     }
   }
@@ -65,6 +70,7 @@ class EmployeeServiceImpl implements EmployeeService {
     try {
       await _firestore.collection(_collection).doc(employee.userId).update(employee.toMap());
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al actualizar empleado', StackTrace.current);
       throw Exception('Error al actualizar empleado: $e');
     }
   }
@@ -81,6 +87,7 @@ class EmployeeServiceImpl implements EmployeeService {
         await _auth.currentUser?.delete();
       }
     } catch (e) {
+      FirebaseCrashlytics.instance.recordError('Error al eliminar empleado', StackTrace.current);
       throw Exception('Error al eliminar empleado: $e');
     }
   }
